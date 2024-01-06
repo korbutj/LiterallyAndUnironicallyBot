@@ -1,21 +1,17 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Bot.Data;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
-namespace Bot
+namespace Bot.Base
 {
     class Program
     {
-        private DiscordSocketClient _client;
-        private IConfiguration _config;
+        private DiscordSocketClient client = null!;
+        private IConfiguration config = null!;
         
-        private readonly DiscordSocketConfig _socketConfig = new()
+        private readonly DiscordSocketConfig socketConfig = new()
         {
             GatewayIntents = GatewayIntents.All,
             AlwaysDownloadUsers = true,
@@ -26,30 +22,32 @@ namespace Bot
 
         public async Task MainAsync()
         {
-            _client = new DiscordSocketClient(_socketConfig);
-            _config = BuildConfig();
-
+            client = new DiscordSocketClient(socketConfig);
+            config = BuildConfig();
+            
             var services = ConfigureServices();
+
             await services.GetRequiredService<CommandHandler>().InstallCommandsAsync(services);
 
-            await _client.LoginAsync(TokenType.Bot, _config["token"]);
-            await _client.StartAsync();
+            await client.LoginAsync(TokenType.Bot, config["token"]);
+            await client.StartAsync();
         }
         
         private IServiceProvider ConfigureServices()
         {
-            return new ServiceCollection()
+            var services = new ServiceCollection()
                 // Base
-                .AddSingleton(_client)
+                .AddSingleton(client)
                 .AddSingleton<CommandService>()
                 // .AddSingleton<CommandHandlingService>()
                 .AddSingleton<CommandHandler>()
                 // Logging
                 .AddLogging()
                 // Extra
-                .AddSingleton(_config)
-                // Add additional services here...
-                .BuildServiceProvider();
+                .AddSingleton(config)
+                .AddDbContext<LiterallyContext>();
+            
+            return services.BuildServiceProvider();
         }
 
         private IConfiguration BuildConfig()

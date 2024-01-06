@@ -11,6 +11,7 @@ public class CommandHandler
     private readonly CommandService _commands;
     private IServiceProvider _serviceProvider;
     
+    
     // Retrieve client and CommandService instance via ctor
     public CommandHandler(DiscordSocketClient client, CommandService commands)
     {
@@ -54,6 +55,7 @@ public class CommandHandler
 
     private async Task HandleKekw(KeyValuePair<IEmote, ReactionMetadata> dict, SocketMessage message)
     {
+        var embedBuilder = new EmbedBuilder();
         
     }
 
