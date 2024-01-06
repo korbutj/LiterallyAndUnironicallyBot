@@ -9,4 +9,5 @@ public class GuildSettings : IEntity
     public ulong Id { get; set; }
     
     public ulong? KekwChannel { get; set; }
+    public int? KekwReactionsNeeded { get; set; }
 }

@@ -1,6 +1,9 @@
-﻿namespace Bot.Services;
+﻿using Bot.Data.Models;
+
+namespace Bot.Services;
 
 public interface IGuildService
 {
-    Task SetKekwChannel(ulong guildId, ulong channelId);
+    Task SetupKekwSettings(ulong guildId, ulong channelId, int kekwNeeded);
+    Task<GuildSettings?> GetSettings(ulong guildId);
 }

@@ -15,11 +15,13 @@ namespace Bot.Base
         private readonly DiscordSocketConfig socketConfig = new()
         {
             GatewayIntents = GatewayIntents.All,
-            AlwaysDownloadUsers = true,
+            AlwaysDownloadUsers = true
         };
         
         static void Main(string[] args)
-            => new Program().MainAsync().GetAwaiter().GetResult();
+        {
+            new Program().MainAsync().GetAwaiter().GetResult();
+        }
 
         public async Task MainAsync()
         {
@@ -32,6 +34,8 @@ namespace Bot.Base
 
             await client.LoginAsync(TokenType.Bot, config["token"]);
             await client.StartAsync();
+            
+            await Task.Delay(-1);
         }
         
         private IServiceProvider ConfigureServices()

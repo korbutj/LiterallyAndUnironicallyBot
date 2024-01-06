@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using Bot.Data.Models;
+using Bot.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -10,12 +12,15 @@ public class CommandHandler
     private readonly DiscordSocketClient _client;
     private readonly CommandService _commands;
     private IServiceProvider _serviceProvider;
-    
-    
+    private readonly IGuildService guildService;
+
+
     // Retrieve client and CommandService instance via ctor
-    public CommandHandler(DiscordSocketClient client, CommandService commands)
+    public CommandHandler(DiscordSocketClient client, CommandService commands, IServiceProvider serviceProvider, IGuildService guildService)
     {
         _commands = commands;
+        _serviceProvider = serviceProvider;
+        this.guildService = guildService;
         _client = client;
     }
     
@@ -37,26 +42,46 @@ public class CommandHandler
                                         services: services);
     }
 
-    private async Task HandleReactionsAsync(Cacheable<IUserMessage, ulong> user, Cacheable<IMessageChannel, ulong> message, SocketReaction reaction)
+    private async Task HandleReactionsAsync(Cacheable<IUserMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel, SocketReaction reaction)
     {
-        var reactionsToHandle = reaction.Message.Value.Reactions.Where(x => x.Value.ReactionCount > 5).ToList();
+        var guildChannel = (channel.Value as SocketGuildChannel);
+        var userMessage = await guildChannel.Guild.GetTextChannel(channel.Id).GetMessageAsync(message.Id);
+        
+        var guild = guildChannel?.Guild;
+        if (guild is null)
+            return;
+        
+        var settings = await guildService.GetSettings(guild.Id);
 
-        var tasks = reactionsToHandle
+        if (settings?.KekwReactionsNeeded is null || settings?.KekwChannel is null)
+            return;
+        
+
+        var handleMessage = userMessage.Reactions
             .Where(x => x.Key.Name.ToLower().Contains("kekw"))
-            .Select(x => HandleKekw(x, reaction.Message.Value));
+            .Any(x => x.Value.ReactionCount >= settings.KekwReactionsNeeded);
 
-        await Task.WhenAll(tasks);
-
-        if (reactionsToHandle.Any(x => x.Key.Name.ToLower().Contains("cringe")))
+        if (handleMessage)
         {
-            
+            var embed = buildKekwEmbed(userMessage, guild, settings);
+            await guild.GetTextChannel(settings.KekwChannel.Value)?.SendMessageAsync("", false, embed);
         }
     }
 
-    private async Task HandleKekw(KeyValuePair<IEmote, ReactionMetadata> dict, SocketMessage message)
+    private Embed buildKekwEmbed(IMessage message, SocketGuild guildSocket, GuildSettings guildSettings)
     {
         var embedBuilder = new EmbedBuilder();
+        embedBuilder.Author = new EmbedAuthorBuilder() 
+        { 
+            Name = message.Author.Username,
+            IconUrl = message.Author.GetAvatarUrl() 
+        };
         
+        embedBuilder.WithDescription(message.Content);
+        if (message.Attachments.Any())
+            embedBuilder.WithImageUrl(message.Attachments.First().Url);
+
+        return embedBuilder.Build();
     }
     
     private async Task HandleCommandAsync(SocketMessage messageParam)

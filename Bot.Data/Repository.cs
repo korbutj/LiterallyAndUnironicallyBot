@@ -1,5 +1,6 @@
 ﻿using Bot.Data.Interfaces;
 using Bot.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bot.Data;
 
@@ -14,7 +15,7 @@ public class Repository : IRepository<LiterallyContext>
 
     public async Task Upsert<T>(T obj) where T : class, IEntity
     {
-        var result = context.Set<T>().FirstOrDefault(x => x.Id == obj.Id);
+        var result = await context.Set<T>().FirstOrDefaultAsync(x => x.Id == obj.Id);
         
         if (result == null)
             await context.Set<T>().AddAsync(obj);
@@ -22,5 +23,12 @@ public class Repository : IRepository<LiterallyContext>
             context.Entry(result).CurrentValues.SetValues(obj);
 
         await context.SaveChangesAsync();
+    }
+
+    public async Task<T?> Get<T>(ulong id) where T : class, IEntity
+    {
+        var result = await context.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
+
+        return result;
     }
 }

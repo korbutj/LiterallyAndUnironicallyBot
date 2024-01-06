@@ -1,4 +1,5 @@
 ﻿using Bot.Data;
+using Bot.Data.Models;
 
 namespace Bot.Services;
 
@@ -11,8 +12,17 @@ public class GuildService : IGuildService
         this.repository = repository;
     }
 
-    public Task SetKekwChannel(ulong guildId, ulong channelId)
+    public async Task SetupKekwSettings(ulong guildId, ulong channelId, int kekwNeeded)
     {
-        throw new NotImplementedException();
+        var guild = await repository.Get<GuildSettings>(guildId) ?? new GuildSettings() { Id = guildId };
+        guild.KekwChannel = channelId;
+        guild.KekwReactionsNeeded = kekwNeeded;
+
+        await repository.Upsert(guild);
+    }
+
+    public async Task<GuildSettings?> GetSettings(ulong guildId)
+    {
+        return await repository.Get<GuildSettings>(guildId);
     }
 }
