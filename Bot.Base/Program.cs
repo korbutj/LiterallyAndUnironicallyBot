@@ -1,4 +1,5 @@
 using Bot.Data;
+using Bot.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -45,7 +46,9 @@ namespace Bot.Base
                 .AddLogging()
                 // Extra
                 .AddSingleton(config)
-                .AddDbContext<LiterallyContext>();
+                .AddDbContext<LiterallyContext>()
+                .AddScoped<IRepository<LiterallyContext>, Repository>()
+                .AddScoped<IGuildService, GuildService>();
             
             return services.BuildServiceProvider();
         }

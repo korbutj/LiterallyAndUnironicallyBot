@@ -21,6 +21,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Bot.Data\Bot.Data.csproj" />
+      <ProjectReference Include="..\Bot.Services\Bot.Services.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Modules\" />
     </ItemGroup>
 
 </Project>

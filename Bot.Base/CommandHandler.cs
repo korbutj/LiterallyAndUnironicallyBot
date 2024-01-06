@@ -58,30 +58,30 @@ public class CommandHandler
         var embedBuilder = new EmbedBuilder();
         
     }
-
+    
     private async Task HandleCommandAsync(SocketMessage messageParam)
     {
         // Don't process the command if it was a system message
         var message = messageParam as SocketUserMessage;
         if (message == null) return;
 
-        var rng = new Random();
-        var randomNumber = rng.NextInt64(100);
-        
-        if (message.Author.Username == "lukeee6285")
-        {
-            var text = message.ToString();
-            if (text.Length > 20 && text.AsEnumerable().Sum(x => char.IsUpper(x) ? 1 : 0) > (text.Length / 50))
-            {
-                var emote = ((SocketGuildChannel)message.Channel).Guild.Emotes.First(x => x.Name.ToLower() == "banhammer");
-                await message.AddReactionAsync(emote);
-                await message.Channel.SendMessageAsync(":banhammer: @lukeee6285");
-            }
-        }
+        // Create a number to track where the prefix ends and the command begins
+        int argPos = 0;
 
-        if (randomNumber > 97)
-        {
-            await message.AddReactionAsync(Emoji.Parse(":flag_be:"));
-        }
+        // Determine if the message is a command based on the prefix and make sure no bots trigger commands
+        if (!(message.HasCharPrefix('!', ref argPos) || 
+              message.HasMentionPrefix(_client.CurrentUser, ref argPos)) ||
+            message.Author.IsBot)
+            return;
+
+        // Create a WebSocket-based command context based on the message
+        var context = new SocketCommandContext(_client, message);
+
+        // Execute the command with the command context we just
+        // created, along with the service provider for precondition checks.
+        await _commands.ExecuteAsync(
+            context: context, 
+            argPos: argPos,
+            services: _serviceProvider);
     }
 }

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bot.Data.Migrations
 {
     [DbContext(typeof(LiterallyContext))]
-    [Migration("20240106153524_init")]
+    [Migration("20240106161018_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -27,12 +27,12 @@ namespace Bot.Data.Migrations
 
             modelBuilder.Entity("Bot.Data.Models.GuildSettings", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("numeric(20,0)");
 
-                    b.Property<Guid?>("KekwChannel")
-                        .HasColumnType("uuid");
+                    b.Property<decimal?>("KekwChannel")
+                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 

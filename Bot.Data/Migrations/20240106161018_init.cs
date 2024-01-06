@@ -15,8 +15,8 @@ namespace Bot.Data.Migrations
                 name: "GuildSettings",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    KekwChannel = table.Column<Guid>(type: "uuid", nullable: true)
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    KekwChannel = table.Column<decimal>(type: "numeric(20,0)", nullable: true)
                 },
                 constraints: table =>
                 {
