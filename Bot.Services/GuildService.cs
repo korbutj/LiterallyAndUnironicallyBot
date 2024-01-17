@@ -25,4 +25,27 @@ public class GuildService : IGuildService
     {
         return await repository.Get<GuildSettings>(guildId);
     }
+
+    public async Task<ulong> CreateQuote(ulong guildId, ulong authorId, string? content, List<string>? attachementUrls = null)
+    {
+        var quote = new Quotes()
+        {
+            AuthorId = authorId,
+            Content = content,
+            GuildId = guildId
+        };
+
+        var result = await repository.Upsert(quote);
+
+        if (attachementUrls != null && attachementUrls.Any())
+        {
+            var attachements = attachementUrls
+                .Select(x => new QuoteAttachment()
+                    { QuoteId = result.Id, AttachmentUrl = x }).ToList();
+
+            await repository.Upsert(attachements);
+        }
+
+        return quote.Id;
+    }
 }

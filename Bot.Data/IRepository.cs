@@ -5,6 +5,7 @@ namespace Bot.Data;
 
 public interface IRepository<DbContext>
 {
-    Task Upsert<T>(T settings) where T : class, IEntity;
+    Task<T> Upsert<T>(T entity) where T : class, IEntity;
+    Task<List<T>> Upsert<T>(List<T> entity) where T : class, IEntity;
     Task<T?> Get<T>(ulong id) where T : class, IEntity;
 }

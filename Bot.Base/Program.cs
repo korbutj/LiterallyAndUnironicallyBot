@@ -35,7 +35,7 @@ namespace Bot.Base
             await client.LoginAsync(TokenType.Bot, config["token"]);
             await client.StartAsync();
             
-            await Task.Delay(-1);
+            // await Task.Delay(-1);
         }
         
         private IServiceProvider ConfigureServices()

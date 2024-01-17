@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Bot.Data.Interfaces;
 
 namespace Bot.Data.Models;
 
-public class Quotes
+public class Quotes : IEntity
 {
     [Key]
     public ulong Id { get; set; }

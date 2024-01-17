@@ -55,7 +55,6 @@ public class CommandHandler
 
         if (settings?.KekwReactionsNeeded is null || settings?.KekwChannel is null)
             return;
-        
 
         var handleMessage = userMessage.Reactions
             .Where(x => x.Key.Name.ToLower().Contains("kekw"))
@@ -63,25 +62,37 @@ public class CommandHandler
 
         if (handleMessage)
         {
-            var embed = buildKekwEmbed(userMessage, guild, settings);
-            await guild.GetTextChannel(settings.KekwChannel.Value)?.SendMessageAsync("", false, embed);
+            await SaveQoute(userMessage, guild);
+            
+            await SendQuote(userMessage, guild, settings);
         }
     }
 
-    private Embed buildKekwEmbed(IMessage message, SocketGuild guildSocket, GuildSettings guildSettings)
+    private async Task SaveQoute(IMessage userMessage, SocketGuild guild)
     {
-        var embedBuilder = new EmbedBuilder();
-        embedBuilder.Author = new EmbedAuthorBuilder() 
-        { 
-            Name = message.Author.Username,
-            IconUrl = message.Author.GetAvatarUrl() 
+        var attachmentUrls = userMessage.Attachments.Select(x => x.Url).ToList();
+
+        await guildService.CreateQuote(guild.Id, userMessage.Author.Id, userMessage.Content, attachmentUrls);
+    }
+
+    private async Task SendQuote(IMessage message, SocketGuild guildSocket, GuildSettings guildSettings)
+    {
+        var embedBuilder = new EmbedBuilder
+        {
+            Author = new EmbedAuthorBuilder() 
+            { 
+                Name = message.Author.Username,
+                IconUrl = message.Author.GetAvatarUrl() 
+            }
         };
-        
+
         embedBuilder.WithDescription(message.Content);
         if (message.Attachments.Any())
             embedBuilder.WithImageUrl(message.Attachments.First().Url);
 
-        return embedBuilder.Build();
+        var embed = embedBuilder.Build();
+        
+        await guildSocket.GetTextChannel(guildSettings.KekwChannel.Value)?.SendMessageAsync("", false, embed);
     }
     
     private async Task HandleCommandAsync(SocketMessage messageParam)
