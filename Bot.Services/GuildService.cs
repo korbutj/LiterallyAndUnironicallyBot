@@ -14,7 +14,7 @@ public class GuildService : IGuildService
 
     public async Task SetupKekwSettings(ulong guildId, ulong channelId, int kekwNeeded)
     {
-        var guild = await repository.Get<GuildSettings>(guildId) ?? new GuildSettings() { Id = guildId };
+        var guild = await repository.Get<GuildSettings>(x => x.GuildId == guildId) ?? new GuildSettings() { GuildId = guildId };
         guild.KekwChannel = channelId;
         guild.KekwReactionsNeeded = kekwNeeded;
 
@@ -23,10 +23,10 @@ public class GuildService : IGuildService
 
     public async Task<GuildSettings?> GetSettings(ulong guildId)
     {
-        return await repository.Get<GuildSettings>(guildId);
+        return await repository.Get<GuildSettings>(x => x.GuildId == guildId);
     }
 
-    public async Task<ulong> CreateQuote(ulong guildId, ulong authorId, string? content, List<string>? attachementUrls = null)
+    public async Task<Guid> CreateQuote(ulong guildId, ulong authorId, string? content, List<string>? attachementUrls = null)
     {
         var quote = new Quotes()
         {
@@ -41,7 +41,10 @@ public class GuildService : IGuildService
         {
             var attachements = attachementUrls
                 .Select(x => new QuoteAttachment()
-                    { QuoteId = result.Id, AttachmentUrl = x }).ToList();
+                {
+                    QuoteId = result.Id, 
+                    AttachmentUrl = x
+                }).ToList();
 
             await repository.Upsert(attachements);
         }

@@ -1,4 +1,5 @@
-﻿using Bot.Data.Interfaces;
+﻿using System.Linq.Expressions;
+using Bot.Data.Interfaces;
 using Bot.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,9 +45,16 @@ public class Repository : IRepository<LiterallyContext>
         return entities;
     }
 
-    public async Task<T?> Get<T>(ulong id) where T : class, IEntity
+    public async Task<T?> Get<T>(Guid id) where T : class, IEntity
     {
         var result = await context.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
+
+        return result;
+    }
+
+    public async Task<T?> Get<T>(Expression<Func<T, bool>> predicate) where T : class, IEntity
+    {
+        var result = await context.Set<T>().FirstOrDefaultAsync(predicate);
 
         return result;
     }

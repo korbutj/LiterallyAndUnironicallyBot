@@ -3,6 +3,7 @@ using System;
 using Bot.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bot.Data.Migrations
 {
     [DbContext(typeof(LiterallyContext))]
-    partial class LiterallyContextModelSnapshot : ModelSnapshot
+    [Migration("20240119181059_w-nienawisci-do-postgresa-tak-zostalem-wychowany")]
+    partial class wnienawiscidopostgresatakzostalemwychowany
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,11 +27,7 @@ namespace Bot.Data.Migrations
 
             modelBuilder.Entity("Bot.Data.Models.GuildSettings", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("GuildId")
+                    b.Property<decimal>("Id")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("KekwChannel")
@@ -69,15 +68,15 @@ namespace Bot.Data.Migrations
 
             modelBuilder.Entity("Bot.Data.Models.QuoteAttachment", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("AttachmentUrl")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("QuoteId")
-                        .HasColumnType("uuid");
+                    b.Property<decimal>("QuoteId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 
@@ -88,9 +87,9 @@ namespace Bot.Data.Migrations
 
             modelBuilder.Entity("Bot.Data.Models.Quotes", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("AuthorId")
                         .HasColumnType("numeric(20,0)");
@@ -101,12 +100,9 @@ namespace Bot.Data.Migrations
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<Guid?>("GuildId1")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildId1");
+                    b.HasIndex("GuildId");
 
                     b.ToTable("Quotes");
                 });
@@ -126,7 +122,9 @@ namespace Bot.Data.Migrations
                 {
                     b.HasOne("Bot.Data.Models.GuildSettings", "Guild")
                         .WithMany()
-                        .HasForeignKey("GuildId1");
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Guild");
                 });

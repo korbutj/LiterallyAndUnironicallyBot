@@ -87,12 +87,22 @@ public class CommandHandler
         };
 
         embedBuilder.WithDescription(message.Content);
-        if (message.Attachments.Any())
-            embedBuilder.WithImageUrl(message.Attachments.First().Url);
+        var mainEmbed = embedBuilder.Build();
 
-        var embed = embedBuilder.Build();
-        
-        await guildSocket.GetTextChannel(guildSettings.KekwChannel.Value)?.SendMessageAsync("", false, embed);
+        if (message.Attachments.Any())
+        {
+            var attachmentEmbeds = new List<Embed>();
+            foreach (var attachment in message.Attachments)
+                attachmentEmbeds.Add(new EmbedBuilder().WithImageUrl(attachment.Url).Build());
+            
+            attachmentEmbeds.Insert(0, mainEmbed);
+            
+            await guildSocket.GetTextChannel(guildSettings.KekwChannel.Value)?.SendMessageAsync("", false, embeds: attachmentEmbeds.ToArray());
+        }
+        else
+        {
+            await guildSocket.GetTextChannel(guildSettings.KekwChannel.Value)?.SendMessageAsync("", false, mainEmbed);
+        }
     }
     
     private async Task HandleCommandAsync(SocketMessage messageParam)

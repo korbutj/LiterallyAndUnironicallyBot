@@ -1,11 +1,27 @@
 ﻿version: "3.9"
 
 services:
+  
+  database:
+    image: postgres
+    container_name: database
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${{ secrets.SA_PASSWORD }}
+      - POSTGRES_USER=${{ secrets.SA_USERNAME }}
+      - POSTGRES_DB=postgres
+    networks:
+      - bot-network
+  
   bot:
     build: ./Bot.Base/
     container_name: LiterallyContainer
     restart: unless-stopped
-    environment:
-      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN:-yourtokenhere}
-      - DISCORD_BOT_ACTIVITY=${DISCORD_BOT_ACTIVITY:-I'm alive!}
-      - DISCORD_BOT_COMMAND_PREFIX=${DISCORD_BOT_COMMAND_PREFIX:-!}
+    depends_on: 
+      - database
+    networks:
+      - bot-network
+
+networks:
+  bot-network:
+    driver: bridge

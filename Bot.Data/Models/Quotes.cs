@@ -6,7 +6,7 @@ namespace Bot.Data.Models;
 public class Quotes : IEntity
 {
     [Key]
-    public ulong Id { get; set; }
+    public Guid Id { get; set; }
 
     public string? Content { get; set; }
     public ulong AuthorId { get; set; }

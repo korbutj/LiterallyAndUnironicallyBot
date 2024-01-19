@@ -14,16 +14,19 @@ namespace Bot.Base.Modules
         }
 
         [Command("SetupKekw")]
-        public Task SetupKekw(string channelMention, int kekwNeededForQuote)
+        public async Task SetupKekw(string channelMention, int kekwNeededForQuote)
         {
             var quoteChannel = this.Context.Message.MentionedChannels.FirstOrDefault();
 
             if (quoteChannel is null)
-                return ReplyAsync("Channel not found");
+            {
+                await ReplyAsync("Channel not found");
+                return;
+            }
             
-            guildService.SetupKekwSettings(this.Context.Guild.Id, quoteChannel.Id, kekwNeededForQuote);
+            await guildService.SetupKekwSettings(this.Context.Guild.Id, quoteChannel.Id, kekwNeededForQuote);
 
-            return ReplyAsync($"Channel set: {channelMention}; Kekws needed for quoting: {kekwNeededForQuote}");
+            await ReplyAsync($"Channel set: {channelMention}; Kekws needed for quoting: {kekwNeededForQuote}");
         }
     }
 }
