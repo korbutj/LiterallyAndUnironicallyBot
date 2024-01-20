@@ -3,10 +3,8 @@ on:
   push:
     branches:
       - master
-env:
-  AWS_REGION: ap-northeast-1
-  AWS_LIGHTSAIL_SERVICE_NAME: amazon-lightsail-containers-test
 jobs:
+  environment: Testing
   deploy:
     name: Build and deploy
     runs-on: ubuntu-latest
@@ -29,16 +27,16 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Build Docker Image
-        run: docker build -t ${{ env.AWS_LIGHTSAIL_SERVICE_NAME }}:release .
+        run: docker build -t ${{ vars.AWS_LIGHTSAIL_SERVICE_NAME }}:release .
       - name: Push and Deploy
         run: |
-          service_name=${{ env.AWS_LIGHTSAIL_SERVICE_NAME }}
+          service_name=${{ vars.AWS_LIGHTSAIL_SERVICE_NAME }}
           aws lightsail push-container-image \
-            --region ${{ env.AWS_REGION }} \
+            --region ${{ vars.AWS_REGION }} \
             --service-name ${service_name} \
             --label ${service_name} \
             --image ${service_name}:release

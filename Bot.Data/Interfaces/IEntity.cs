@@ -2,5 +2,5 @@
 
 public interface IEntity
 {
-    public ulong Id { get; set; }
+    public Guid Id { get; set; }
 }

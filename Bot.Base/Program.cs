@@ -35,6 +35,8 @@ namespace Bot.Base
             await client.LoginAsync(TokenType.Bot, config["token"]);
             await client.StartAsync();
             
+            // COMMENT THIS IF YOU WANT TO RUN
+            // DOTNET EF MIGRATIONS ADD
             await Task.Delay(-1);
         }
         
@@ -50,7 +52,7 @@ namespace Bot.Base
                 .AddLogging()
                 // Extra
                 .AddSingleton(config)
-                .AddDbContext<LiterallyContext>()
+                .AddDbContext<LiterallyContext>(opt => opt.UseNpgsql(config["literallyConnectionString"])) //
                 .AddScoped<IRepository<LiterallyContext>, Repository>()
                 .AddScoped<IGuildService, GuildService>();
             

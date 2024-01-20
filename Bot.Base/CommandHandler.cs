@@ -55,7 +55,6 @@ public class CommandHandler
 
         if (settings?.KekwReactionsNeeded is null || settings?.KekwChannel is null)
             return;
-        
 
         var handleMessage = userMessage.Reactions
             .Where(x => x.Key.Name.ToLower().Contains("kekw"))
@@ -63,25 +62,47 @@ public class CommandHandler
 
         if (handleMessage)
         {
-            var embed = buildKekwEmbed(userMessage, guild, settings);
-            await guild.GetTextChannel(settings.KekwChannel.Value)?.SendMessageAsync("", false, embed);
+            await SaveQoute(userMessage, guild);
+            
+            await SendQuote(userMessage, guild, settings);
         }
     }
 
-    private Embed buildKekwEmbed(IMessage message, SocketGuild guildSocket, GuildSettings guildSettings)
+    private async Task SaveQoute(IMessage userMessage, SocketGuild guild)
     {
-        var embedBuilder = new EmbedBuilder();
-        embedBuilder.Author = new EmbedAuthorBuilder() 
-        { 
-            Name = message.Author.Username,
-            IconUrl = message.Author.GetAvatarUrl() 
-        };
-        
-        embedBuilder.WithDescription(message.Content);
-        if (message.Attachments.Any())
-            embedBuilder.WithImageUrl(message.Attachments.First().Url);
+        var attachmentUrls = userMessage.Attachments.Select(x => x.Url).ToList();
 
-        return embedBuilder.Build();
+        await guildService.CreateQuote(guild.Id, userMessage.Author.Id, userMessage.Content, attachmentUrls);
+    }
+
+    private async Task SendQuote(IMessage message, SocketGuild guildSocket, GuildSettings guildSettings)
+    {
+        var embedBuilder = new EmbedBuilder
+        {
+            Author = new EmbedAuthorBuilder() 
+            { 
+                Name = message.Author.Username,
+                IconUrl = message.Author.GetAvatarUrl() 
+            }
+        };
+
+        embedBuilder.WithDescription(message.Content);
+        var mainEmbed = embedBuilder.Build();
+
+        if (message.Attachments.Any())
+        {
+            var attachmentEmbeds = new List<Embed>();
+            foreach (var attachment in message.Attachments)
+                attachmentEmbeds.Add(new EmbedBuilder().WithImageUrl(attachment.Url).Build());
+            
+            attachmentEmbeds.Insert(0, mainEmbed);
+            
+            await guildSocket.GetTextChannel(guildSettings.KekwChannel.Value)?.SendMessageAsync("", false, embeds: attachmentEmbeds.ToArray());
+        }
+        else
+        {
+            await guildSocket.GetTextChannel(guildSettings.KekwChannel.Value)?.SendMessageAsync("", false, mainEmbed);
+        }
     }
     
     private async Task HandleCommandAsync(SocketMessage messageParam)

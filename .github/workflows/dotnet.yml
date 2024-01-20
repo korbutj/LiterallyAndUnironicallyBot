@@ -10,19 +10,21 @@ on:
     branches: [ "main" ]
 
 jobs:
+  
   build:
-
     runs-on: ubuntu-latest
+    environment: Testing
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
     - name: App Settings Variable Substitution
       uses: microsoft/variable-substitution@v1
       with:
-        files: '${{ env.APP_SETTINGS_PATH }}'
+        files: ${{ vars.APP_SETTINGS_PATH }}
       env:
         token: ${{ secrets.DISCORD_TOKEN }}
         literallyConnectionString: ${{ secrets.CON_STRING }}
-    - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
