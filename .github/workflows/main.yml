@@ -11,6 +11,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name : check pwd
+        uses: |
+          CPWD=$(pwd)
+          echo "$CPWD"
+          TEST=$(ls -l)
+          echo "$TEST"
       - name: Install Utilities
         run: |
           sudo apt-get update
@@ -31,7 +37,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Build Docker Image
-        run: docker build -t ${{ vars.AWS_LIGHTSAIL_SERVICE_NAME }}:release /bot.base/.
+        run: docker build -t ${{ vars.AWS_LIGHTSAIL_SERVICE_NAME }}:release Bot.Base/.
       - name: Push and Deploy
         run: |
           service_name=${{ vars.AWS_LIGHTSAIL_SERVICE_NAME }}
