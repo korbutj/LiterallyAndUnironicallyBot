@@ -1,4 +1,5 @@
 name: Build and deploy Docker app to Lightsail
+environment: Testing
 on:
   push:
     branches:
