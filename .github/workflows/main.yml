@@ -37,7 +37,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Build Docker Image
-        run: docker compose build -t ${{ vars.AWS_LIGHTSAIL_SERVICE_NAME }}:release Bot.Base/.
+        run: docker compose build Bot.Base/.
       - name: Push and Deploy
         run: |
           service_name=${{ vars.AWS_LIGHTSAIL_SERVICE_NAME }}
