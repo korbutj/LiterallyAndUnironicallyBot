@@ -4,13 +4,13 @@ on:
     branches:
       - master
 jobs:
-  environment: Testing
   deploy:
+    environment: Testing
     name: Build and deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install Utilities
         run: |
           sudo apt-get update
