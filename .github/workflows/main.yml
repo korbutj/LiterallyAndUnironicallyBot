@@ -2,22 +2,23 @@ name: Build and deploy Docker app to Lightsail
 on:
   push:
     branches:
-      - main
+      - master
+env:
+  AWS_REGION: eu-central-1
+  AWS_LIGHTSAIL_SERVICE_NAME: literally-discord-bot
 jobs:
   deploy:
-    environment: Testing
     name: Build and deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      
-      
+        
       - name: Install Utilities
         run: |
           sudo apt-get update
           sudo apt-get install -y jq unzip
-      
+          
       - name: Install AWS Client
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -27,25 +28,22 @@ jobs:
           curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "lightsailctl"
           sudo mv "lightsailctl" "/usr/local/bin/lightsailctl"
           sudo chmod +x /usr/local/bin/lightsailctl
-      
+          
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      
-      - name: Set up Docker Compose
-        run: docker-compose up -d
-        env:
-          POSTGRES_USER=${{ secrets.SA_USERNAME }}
-          POSTGRES_PASSWORD=${{ secrets.SA_PASSWORD }}
           
+      - name: Build Docker Image
+        run: docker build -t ${{ env.AWS_LIGHTSAIL_SERVICE_NAME }}:release .
+        
       - name: Push and Deploy
         run: |
-          service_name=${{ vars.AWS_LIGHTSAIL_SERVICE_NAME }}
+          service_name=${{ env.AWS_LIGHTSAIL_SERVICE_NAME }}
           aws lightsail push-container-image \
-            --region ${{ vars.AWS_REGION }} \
+            --region ${{ env.AWS_REGION }} \
             --service-name ${service_name} \
             --label ${service_name} \
             --image ${service_name}:release
