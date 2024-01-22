@@ -18,7 +18,8 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 8.0      
+          dotnet-version: 8.0
+          include-prerelease: true
       
       - name: Install Utilities
         run: |
