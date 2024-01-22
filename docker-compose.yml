@@ -14,7 +14,7 @@ services:
       - bot-network
   
   bot:
-    build: ./Bot.Base/
+    build: .
     container_name: LiterallyContainer
     restart: unless-stopped
     depends_on: 

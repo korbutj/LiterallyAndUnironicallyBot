@@ -38,7 +38,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           
       - name: Build Docker Image
-        run: docker build -t ${{ env.AWS_LIGHTSAIL_SERVICE_NAME }}:release .
+        run: docker compose build ${{ env.AWS_LIGHTSAIL_SERVICE_NAME }}:release .
         
       - name: Push and Deploy
         run: |
@@ -49,5 +49,4 @@ jobs:
             --label ${service_name} \
             --image ${service_name}:release
           aws lightsail get-container-images --service-name ${service_name} | jq --raw-output ".containerImages[0].image" > image.txt
-          jq --arg image $(cat image.txt) '.containers.app.image = $image' container.template.json > container.json
-          aws lightsail create-container-service-deployment --service-name ${service_name} --cli-input-json file://$(pwd)/container.json
+          aws lightsail create-container-service-deployment --service-name ${service_name}
