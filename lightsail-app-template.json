@@ -1,0 +1,15 @@
+﻿{
+  "serviceName": "aws-lightsail-app",
+  "containers": {
+    "app": {
+      "image": "",
+      "ports": {
+        "8080": "HTTP"
+      }
+    }
+  },
+  "publicEndpoint": {
+    "containerName": "app",
+    "containerPort": 8080
+  }
+}
