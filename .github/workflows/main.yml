@@ -1,4 +1,4 @@
-name: Build and deploy Docker app to Lightsail
+name: Build and deploy multi-container app to ECS
 
 on:
   push:
@@ -7,7 +7,6 @@ on:
 
 env:
   AWS_REGION: eu-central-1
-  AWS_LIGHTSAIL_SERVICE_NAME: literally-discord-bot
 
 jobs:
   deploy:
@@ -23,18 +22,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq unzip
 
-      - name: Install AWS Client
+      - name: Install AWS CLI and ECS CLI
         run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install || true
-          aws --version
-          curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "lightsailctl"
-          sudo mv "lightsailctl" "/usr/local/bin/lightsailctl"
-          sudo chmod +x /usr/local/bin/lightsailctl
-
-      - name: Build Docker Image
-        run: docker build -t ${{ env.AWS_LIGHTSAIL_SERVICE_NAME }}:release Bot.Base/.
+          sudo apt-get install -y docker.io
+          sudo apt-get install -y awscli
+          sudo curl -Lo /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+          sudo chmod +x /usr/local/bin/ecs-cli
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -43,17 +36,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Push and Deploy
+      - name: Build Docker Images
         run: |
-          service_name=${{ env.AWS_LIGHTSAIL_SERVICE_NAME }}
-          aws lightsail push-container-image \
-            --region ${{ env.AWS_REGION }} \
-            --service-name ${service_name} \
-            --label ${service_name} \
-            --image ${service_name}:release
-          aws lightsail create-container-service-deployment --service-name ${service_name}
-          aws lightsail get-container-images --service-name ${service_name} | jq --raw-output ".containerImages[0].image" > image.txt
-          echo $(cat image.txt)
-          jq --arg image $(cat image.txt) '.containers.app.image = $image' lightsail-app-template.json > container.json
-          echo $(cat container.json)
-          aws lightsail create-container-service-deployment --cli-input-json file://$(pwd)/container.json
+          docker build -t 
+
+      - name: Deploy to ECS
+        run: |
+          ecs-cli configure --region ${{ env.AWS_REGION }} --cluster ${{ env.ECS_CLUSTER_NAME }} --default-launch-type EC2
+          ecs-cli compose --file docker-compose.yml up
