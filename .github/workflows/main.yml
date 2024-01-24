@@ -36,13 +36,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          
-      - name: Build Docker Image
-        run: docker-compose build ${{ env.AWS_LIGHTSAIL_SERVICE_NAME }}:release .
-        env:
-          POSTGRES_PASSWORD=${{ secrets.SA_PASSWORD }}
-          POSTGRES_USER=${{ secrets.SA_USERNAME }}
-        
+
       - name: Push and Deploy
         run: |
           service_name=${{ env.AWS_LIGHTSAIL_SERVICE_NAME }}
